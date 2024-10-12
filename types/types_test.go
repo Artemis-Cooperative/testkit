@@ -6,6 +6,14 @@ import (
 )
 
 func TestBasicInstances(t *testing.T) {
+	expected := BasicKinds()
+	actual := instancesToKindStrings(BasicInstances())
+
+	assertManyEquals(t, expected, actual)
+	assertEquals(t, len(expected), len(actual))
+}
+
+func TestBasicKinds(t *testing.T) {
 	expected := []string{
 		"bool",
 		"string",
@@ -25,13 +33,20 @@ func TestBasicInstances(t *testing.T) {
 		"complex64",
 		"complex128",
 	}
-	actual := instancesToKindStrings(BasicInstances())
+	actual := BasicKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestComparableInstances(t *testing.T) {
+	expected := ComparableKinds()
+	actual := instancesToKindStrings(ComparableInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TestComparableInstances(t *testing.T) {
+func TestComparableKinds(t *testing.T) {
 	expected := []string{
 		"bool",
 		"string",
@@ -55,13 +70,20 @@ func TestComparableInstances(t *testing.T) {
 		"chan",
 		"ptr",
 	}
-	actual := instancesToKindStrings(ComparableInstances())
+	actual := ComparableKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestElementInstances(t *testing.T) {
+	expected := ElementKinds()
+	actual := instancesToKindStrings(ElementInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TestElementInstances(t *testing.T) {
+func TestElementKinds(t *testing.T) {
 	expected := []string{
 		"bool",
 		"string",
@@ -88,13 +110,20 @@ func TestElementInstances(t *testing.T) {
 		"func",
 		"ptr",
 	}
-	actual := instancesToKindStrings(ElementInstances())
+	actual := ElementKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestKeyInstances(t *testing.T) {
+	expected := KeyKinds()
+	actual := instancesToKindStrings(KeyInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TestKeyInstances(t *testing.T) {
+func TestKeyKinds(t *testing.T) {
 	expected := []string{
 		"bool",
 		"string",
@@ -118,13 +147,20 @@ func TestKeyInstances(t *testing.T) {
 		"chan",
 		"ptr",
 	}
-	actual := instancesToKindStrings(KeyInstances())
+	actual := KeyKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestIntegerInstances(t *testing.T) {
+	expected := IntegerKinds()
+	actual := instancesToKindStrings(IntegerInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TesIntegerInstances(t *testing.T) {
+func TestIntegerKinds(t *testing.T) {
 	expected := []string{
 		"int",
 		"int8",
@@ -137,13 +173,20 @@ func TesIntegerInstances(t *testing.T) {
 		"uint32",
 		"uint64",
 	}
-	actual := instancesToKindStrings(IntegerInstances())
+	actual := IntegerKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestOrderedInstances(t *testing.T) {
+	expected := OrderedKinds()
+	actual := instancesToKindStrings(OrderedInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TestOrderedInstances(t *testing.T) {
+func TestOrderedKinds(t *testing.T) {
 	expected := []string{
 		"bool",
 		"string",
@@ -161,13 +204,20 @@ func TestOrderedInstances(t *testing.T) {
 		"float32",
 		"float64",
 	}
-	actual := instancesToKindStrings(OrderedInstances())
+	actual := OrderedKinds()
+
+	assertManyEquals(t, expected, actual)
+}
+
+func TestNumbericInstances(t *testing.T) {
+	expected := NumbericKinds()
+	actual := instancesToKindStrings(NumbericInstances())
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
 }
 
-func TestNumbericInstances(t *testing.T) {
+func TestNumbericKinds(t *testing.T) {
 	expected := []string{
 		"int",
 		"int8",
@@ -184,10 +234,9 @@ func TestNumbericInstances(t *testing.T) {
 		"complex64",
 		"complex128",
 	}
-	actual := instancesToKindStrings(NumbericInstances())
+	actual := NumbericKinds()
 
 	assertManyEquals(t, expected, actual)
-	assertEquals(t, len(expected), len(actual))
 }
 
 func TestSliceInstances(t *testing.T) {
@@ -217,37 +266,21 @@ func TestMapInstances(t *testing.T) {
 
 //region Duplicate code to prevent circular dependencies
 
+// Assert that the expected and actual slices given are equal.
 func assertManyEquals[T comparable](t *testing.T, expected []T, actual []T) {
 	for i := 0; i < len(expected); i++ {
 		assertEquals(t, expected[i], actual[i])
 	}
 }
 
+// Assert that the expected and actual values given are equal.
 func assertEquals[T comparable](t *testing.T, expected T, actual T) {
 	if actual != expected {
 		t.Errorf("\nExpected:\t%#v\nActual:\t\t%#v\n", expected, actual)
 	}
 }
 
-func instancesToKindStrings(instances []any) []string {
-	var kindStrings []string
-
-	for _, instance := range instances {
-		kindStrings = append(kindStrings, kindString(instance))
-	}
-
-	return kindStrings
-}
-
-// Return the kind of the given type as a string.
-func kindString(v any) string {
-	if v == nil {
-		return "<nil>"
-	} else {
-		return reflect.TypeOf(v).Kind().String()
-	}
-}
-
+// Convert slice instances to element kind strings.
 func slicesToElementKindStrings(slices []any) []string {
 	var elementKindStrings []string
 
@@ -265,6 +298,7 @@ func slicesToElementKindStrings(slices []any) []string {
 	return elementKindStrings
 }
 
+// Convert map instances to key|value kind strings.
 func mapsToKeyElementKindStrings(maps []any) []string {
 	var keyElementKindStrings []string
 
