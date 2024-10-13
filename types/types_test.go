@@ -302,6 +302,25 @@ func TestAllTypeInstances(t *testing.T) {
 	assertEquals(t, len(expected), len(actual))
 }
 
+func TestKinds(t *testing.T) {
+	expected := []string{
+		"int",
+		"int8",
+		"int32",
+		"int64",
+		"uint8",
+		"uint16",
+		"uint64",
+	}
+	actual := Kinds(
+		[]string{"integer"},
+		[]string{"int16", "uint", "uint32"},
+	)
+
+	assertEquals(t, len(expected), len(actual))
+	assertManyEquals(t, expected, actual)
+}
+
 func TestAllKinds(t *testing.T) {
 	expected := []string{
 		"bool",
@@ -328,7 +347,7 @@ func TestAllKinds(t *testing.T) {
 		"ptr",
 		"<nil>",
 	}
-	actual := AllKinds([]string{"slice", "map"})
+	actual := Kinds(nil, []string{"slice", "map"})
 
 	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))

@@ -123,19 +123,11 @@ func MapInstances() []any {
 // Return all type instances, excluding the kinds given.
 func AllTypeInstances(exclude []string) []any {
 	var filtered []any
-	isExcluded := func(kind string) bool {
-		for _, excluded := range exclude {
-			if excluded == kind {
-				return true
-			}
-		}
-		return false
-	}
 
 	for _, instance := range typeInstances {
 		kind := kindString(instance.Value)
 
-		if !isExcluded(kind) {
+		if !has(exclude, kind) {
 			filtered = append(filtered, instance.Value)
 		}
 	}
@@ -144,32 +136,130 @@ func AllTypeInstances(exclude []string) []any {
 }
 
 // Return all kinds, excluding the kinds given.
-func AllKinds(exclude []string) []string {
-	var filtered []string
-	isExcluded := func(kind string) bool {
-		for _, excluded := range exclude {
-			if excluded == kind {
-				return true
-			}
-		}
-		return false
+func Kinds(includeTags []string, exclude []string) []string {
+	var kinds []string
+
+	// Include kinds with the tags given
+	for _, includeTag := range includeTags {
+		kinds = transform(
+			filter(typeInstances, func(instance TypeInstance) bool {
+				return has(instance.Tags, includeTag)
+			}),
+			func(instance TypeInstance) string {
+				return kindString(instance.Value)
+			},
+		)
 	}
-	typeInstances := AllTypeInstances(exclude)
 
-	for _, instance := range typeInstances {
-		kind := kindString(instance)
+	// Exclude kinds given
+	if isNotEmpty(exclude) {
+		kinds = filter(kinds, func(kind string) bool {
+			return !has(exclude, kind)
+		})
+	}
 
-		if !isExcluded(kind) {
-			filtered = append(filtered, kind)
+	return kinds
+}
+
+// Return all kinds.
+func AllKinds() []string {
+	return transform(
+		typeInstances,
+		func(instance TypeInstance) string {
+			return kindString(instance.Value)
+		})
+}
+
+//endregion
+
+//region Private
+
+// Return a slice of elements that match the criteria given.
+func filter[F any](filterables []F, criteria func(F) bool) []F {
+	var filtered []F
+
+	for _, filterable := range filterables {
+		if criteria(filterable) {
+			filtered = append(filtered, filterable)
 		}
 	}
 
 	return filtered
 }
 
-//endregion
+// Return a slice of strings that excludes the list given.
+func reject(values []string, exclude []string) []string {
+	var filtered []string
+	isExcluded := func(value string) bool {
+		for _, excluded := range exclude {
+			if excluded == value {
+				return true
+			}
+		}
+		return false
+	}
+	for _, value := range values {
+		if !isExcluded(value) {
+			filtered = append(filtered, value)
+		}
+	}
+	return filtered
+}
 
-//region Private
+// Return an intersection of the slices given.
+func intersect(s1 []string, s2 []string) []string {
+	var intersection []string
+
+	for _, value := range s1 {
+		if has(s2, value) {
+			intersection = append(intersection, value)
+		}
+	}
+
+	for _, value := range s2 {
+		if has(s1, value) {
+			intersection = append(intersection, value)
+		}
+	}
+
+	return intersection
+}
+
+// Return true if the slice given is not empty. Else, false.
+func isNotEmpty(values []string) bool {
+	return len(values) > 0
+}
+
+// Return an union of the slices given.
+func unify(union []string, toUnify []string) []string {
+	for _, value := range toUnify {
+		if !has(union, value) {
+			union = append(union, value)
+		}
+	}
+
+	return union
+}
+
+// Apply the transformer function given to each value in the slice given.
+func transform[V any, T any](values []V, transformer func(value V) T) []T {
+	transformed := make([]T, 0, len(values))
+
+	for _, value := range values {
+		transformed = append(transformed, transformer(value))
+	}
+
+	return transformed
+}
+
+func has(values []string, value string) bool {
+	for _, v := range values {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
 
 // Return type instances for their tag.
 func typeInstancesByTag(tag string) []any {
@@ -184,6 +274,17 @@ func typeInstancesByTag(tag string) []any {
 	}
 
 	return filtered
+}
+
+func kindsByTag(tag string) []string {
+	typeInstances := typeInstancesByTag(tag)
+	var kinds []string
+
+	for _, instance := range typeInstances {
+		kinds = append(kinds, kindString(instance))
+	}
+
+	return kinds
 }
 
 // Convert the instances given to kind strings.
