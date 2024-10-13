@@ -187,58 +187,9 @@ func filter[F any](filterables []F, criteria func(F) bool) []F {
 	return filtered
 }
 
-// Return a slice of strings that excludes the list given.
-func reject(values []string, exclude []string) []string {
-	var filtered []string
-	isExcluded := func(value string) bool {
-		for _, excluded := range exclude {
-			if excluded == value {
-				return true
-			}
-		}
-		return false
-	}
-	for _, value := range values {
-		if !isExcluded(value) {
-			filtered = append(filtered, value)
-		}
-	}
-	return filtered
-}
-
-// Return an intersection of the slices given.
-func intersect(s1 []string, s2 []string) []string {
-	var intersection []string
-
-	for _, value := range s1 {
-		if has(s2, value) {
-			intersection = append(intersection, value)
-		}
-	}
-
-	for _, value := range s2 {
-		if has(s1, value) {
-			intersection = append(intersection, value)
-		}
-	}
-
-	return intersection
-}
-
 // Return true if the slice given is not empty. Else, false.
 func isNotEmpty(values []string) bool {
 	return len(values) > 0
-}
-
-// Return an union of the slices given.
-func unify(union []string, toUnify []string) []string {
-	for _, value := range toUnify {
-		if !has(union, value) {
-			union = append(union, value)
-		}
-	}
-
-	return union
 }
 
 // Apply the transformer function given to each value in the slice given.
@@ -274,17 +225,6 @@ func typeInstancesByTag(tag string) []any {
 	}
 
 	return filtered
-}
-
-func kindsByTag(tag string) []string {
-	typeInstances := typeInstancesByTag(tag)
-	var kinds []string
-
-	for _, instance := range typeInstances {
-		kinds = append(kinds, kindString(instance))
-	}
-
-	return kinds
 }
 
 // Convert the instances given to kind strings.
