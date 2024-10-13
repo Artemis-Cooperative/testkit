@@ -264,6 +264,44 @@ func TestMapInstances(t *testing.T) {
 	assertEquals(t, len(expected), len(actual))
 }
 
+func TestAllTypeInstances(t *testing.T) {
+	expected := []string{
+		"bool",
+		"string",
+		"int",
+		"int8",
+		"int16",
+		"int32",
+		"int64",
+		"uint",
+		"uint8",
+		"uint16",
+		"uint32",
+		"uint64",
+		"uintptr",
+		"float32",
+		"float64",
+		"complex64",
+		"complex128",
+		"array",
+		"struct",
+		"chan",
+		"func",
+		"ptr",
+		"<nil>",
+	}
+	allTypeInstances := AllTypeInstances([]string{"slice", "map"})
+	var actual []string
+
+	// Populate actual
+	for _, instance := range allTypeInstances {
+		actual = append(actual, kindString(instance))
+	}
+
+	assertManyEquals(t, expected, actual)
+	assertEquals(t, len(expected), len(actual))
+}
+
 //region Duplicate code to prevent circular dependencies
 
 // Assert that the expected and actual slices given are equal.

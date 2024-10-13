@@ -84,13 +84,14 @@ func SliceInstances() []any {
 	for _, v := range elementInstances {
 		sliceInstances = append(
 			sliceInstances,
-			reflect.MakeSlice(
-				reflect.SliceOf(
-					reflect.TypeOf(v),
-				),
-				1,
-				1,
-			).Interface(),
+			reflect.
+				MakeSlice(
+					reflect.SliceOf(
+						reflect.TypeOf(v),
+					),
+					0,
+					0).
+				Interface(),
 		)
 	}
 
@@ -117,6 +118,29 @@ func MapInstances() []any {
 	}
 
 	return mapInstances
+}
+
+// Return all type instances, excluding the kinds given.
+func AllTypeInstances(exclude []string) []any {
+	var filtered []any
+	isExcluded := func(kind string) bool {
+		for _, excluded := range exclude {
+			if excluded == kind {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, instance := range typeInstances {
+		kind := kindString(instance.Value)
+
+		if !isExcluded(kind) {
+			filtered = append(filtered, instance.Value)
+		}
+	}
+
+	return filtered
 }
 
 //endregion
