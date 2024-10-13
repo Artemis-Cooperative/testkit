@@ -340,17 +340,19 @@ func TestAllKinds(t *testing.T) {
 		"float64",
 		"complex64",
 		"complex128",
+		"slice",
 		"array",
+		"map",
 		"struct",
 		"chan",
 		"func",
 		"ptr",
 		"<nil>",
 	}
-	actual := Kinds(nil, []string{"slice", "map"})
+	actual := AllKinds()
 
-	assertManyEquals(t, expected, actual)
 	assertEquals(t, len(expected), len(actual))
+	assertManyEquals(t, expected, actual)
 }
 
 //region Duplicate code to prevent circular dependencies
