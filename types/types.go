@@ -143,6 +143,30 @@ func AllTypeInstances(exclude []string) []any {
 	return filtered
 }
 
+// Return all kinds, excluding the kinds given.
+func AllKinds(exclude []string) []string {
+	var filtered []string
+	isExcluded := func(kind string) bool {
+		for _, excluded := range exclude {
+			if excluded == kind {
+				return true
+			}
+		}
+		return false
+	}
+	typeInstances := AllTypeInstances(exclude)
+
+	for _, instance := range typeInstances {
+		kind := kindString(instance)
+
+		if !isExcluded(kind) {
+			filtered = append(filtered, kind)
+		}
+	}
+
+	return filtered
+}
+
 //endregion
 
 //region Private

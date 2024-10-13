@@ -302,6 +302,38 @@ func TestAllTypeInstances(t *testing.T) {
 	assertEquals(t, len(expected), len(actual))
 }
 
+func TestAllKinds(t *testing.T) {
+	expected := []string{
+		"bool",
+		"string",
+		"int",
+		"int8",
+		"int16",
+		"int32",
+		"int64",
+		"uint",
+		"uint8",
+		"uint16",
+		"uint32",
+		"uint64",
+		"uintptr",
+		"float32",
+		"float64",
+		"complex64",
+		"complex128",
+		"array",
+		"struct",
+		"chan",
+		"func",
+		"ptr",
+		"<nil>",
+	}
+	actual := AllKinds([]string{"slice", "map"})
+
+	assertManyEquals(t, expected, actual)
+	assertEquals(t, len(expected), len(actual))
+}
+
 //region Duplicate code to prevent circular dependencies
 
 // Assert that the expected and actual slices given are equal.
