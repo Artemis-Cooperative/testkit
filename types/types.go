@@ -6,10 +6,10 @@ import (
 
 //region Public
 
-type C struct{}
+type Types struct{}
 
 // Return all kinds.
-func (c C) AllKinds() []string {
+func (t Types) AllKinds() []string {
 	return transform(
 		typeInstances,
 		func(instance TypeInstance) string {
@@ -18,60 +18,60 @@ func (c C) AllKinds() []string {
 }
 
 // Return all type instances, excluding the kinds given.
-func (c C) AllTypeInstances() []any {
+func (t Types) AllTypeInstances() []any {
 	return transform(typeInstances,
 		func(instance TypeInstance) any { return instance.Value })
 }
 
 // Return instances of basic types.
-func (c C) BasicInstances() []any {
+func (t Types) BasicInstances() []any {
 	return typeInstancesByTag("basic")
 }
 
 // Return kinds of basic types.
-func (c C) BasicKinds() []string {
-	return instancesToKindStrings(BasicInstances())
+func (t Types) BasicKinds() []string {
+	return instancesToKindStrings(t.BasicInstances())
 }
 
 // Return instances of comparable types.
-func (c C) ComparableInstances() []any {
+func (t Types) ComparableInstances() []any {
 	return typeInstancesByTag("comparable")
 }
 
 // Return kinds of comparable types.
-func (c C) ComparableKinds() []string {
-	return instancesToKindStrings(ComparableInstances())
+func (t Types) ComparableKinds() []string {
+	return instancesToKindStrings(t.ComparableInstances())
 }
 
 // Return instances of element types.
-func (c C) ElementInstances() []any {
+func (t Types) ElementInstances() []any {
 	return typeInstancesByTag("element")
 }
 
 // Return kinds of element types.
-func (c C) ElementKinds() []string {
-	return instancesToKindStrings(ElementInstances())
+func (t Types) ElementKinds() []string {
+	return instancesToKindStrings(t.ElementInstances())
 }
 
 // Return instances of key types, identical to comparable types.
-func (c C) KeyInstances() []any {
+func (t Types) KeyInstances() []any {
 	return typeInstancesByTag("key")
 }
 
 // Return kinds of key types.
-func (c C) KeyKinds() []string {
-	return instancesToKindStrings(KeyInstances())
+func (t Types) KeyKinds() []string {
+	return instancesToKindStrings(t.KeyInstances())
 }
 
 // Return a filtered list of kinds inclusively by the tags given,
 //
 //	then exclusively by specific kinds given.
-func (c C) Kinds(includeTags []string, exclude []string) []string {
+func (t Types) Kinds(includeTags []string, exclude []string) []string {
 	var kinds []string
 
 	// Include kinds with the tags given. Else, include all.
 	if isEmpty(includeTags) {
-		kinds = AllKinds()
+		kinds = t.AllKinds()
 	} else {
 		for _, includeTag := range includeTags {
 			kinds = transform(
@@ -98,12 +98,12 @@ func (c C) Kinds(includeTags []string, exclude []string) []string {
 // Return a filtered list of instances inclusively by the tags given,
 //
 //	then exclusively by specific kinds given.
-func (c C) Instances(includeTags []string, excludeKinds []string) []any {
+func (t Types) Instances(includeTags []string, excludeKinds []string) []any {
 	var instances []any
 
 	// Include kinds with the tags given. Else, include all.
 	if isEmpty(includeTags) {
-		instances = AllTypeInstances()
+		instances = t.AllTypeInstances()
 	} else {
 		for _, includeTag := range includeTags {
 			instances = transform(
@@ -128,38 +128,38 @@ func (c C) Instances(includeTags []string, excludeKinds []string) []any {
 }
 
 // Return instances of integer types.
-func (c C) IntegerInstances() []any {
+func (t Types) IntegerInstances() []any {
 	return typeInstancesByTag("integer")
 }
 
 // Return kinds of integer types.
-func (c C) IntegerKinds() []string {
-	return instancesToKindStrings(IntegerInstances())
+func (t Types) IntegerKinds() []string {
+	return instancesToKindStrings(t.IntegerInstances())
 }
 
 // Return instances of ordered types.
-func (c C) OrderedInstances() []any {
+func (t Types) OrderedInstances() []any {
 	return typeInstancesByTag("ordered")
 }
 
 // Return kinds of ordered types.
-func (c C) OrderedKinds() []string {
-	return instancesToKindStrings(OrderedInstances())
+func (t Types) OrderedKinds() []string {
+	return instancesToKindStrings(t.OrderedInstances())
 }
 
 // Return instances of numeric types.
-func (c C) NumbericInstances() []any {
+func (t Types) NumbericInstances() []any {
 	return typeInstancesByTag("numeric")
 }
 
 // Return kinds of numeric types.
-func (c C) NumbericKinds() []string {
-	return instancesToKindStrings(NumbericInstances())
+func (t Types) NumbericKinds() []string {
+	return instancesToKindStrings(t.NumbericInstances())
 }
 
 // Return instances of slice types.
-func (c C) SliceInstances() []any {
-	elementInstances := ElementInstances()
+func (t Types) SliceInstances() []any {
+	elementInstances := t.ElementInstances()
 	var sliceInstances []any
 
 	for _, v := range elementInstances {
@@ -180,9 +180,9 @@ func (c C) SliceInstances() []any {
 }
 
 // Return instances of map types.
-func (c C) MapInstances() []any {
-	keyInstances := KeyInstances()
-	elementInstances := ElementInstances()
+func (t Types) MapInstances() []any {
+	keyInstances := t.KeyInstances()
+	elementInstances := t.ElementInstances()
 	var mapInstances []any
 
 	for _, k := range keyInstances {
