@@ -6,8 +6,10 @@ import (
 
 //region Public
 
+type C struct{}
+
 // Return all kinds.
-func AllKinds() []string {
+func (c C) AllKinds() []string {
 	return transform(
 		typeInstances,
 		func(instance TypeInstance) string {
@@ -16,55 +18,55 @@ func AllKinds() []string {
 }
 
 // Return all type instances, excluding the kinds given.
-func AllTypeInstances() []any {
+func (c C) AllTypeInstances() []any {
 	return transform(typeInstances,
 		func(instance TypeInstance) any { return instance.Value })
 }
 
 // Return instances of basic types.
-func BasicInstances() []any {
+func (c C) BasicInstances() []any {
 	return typeInstancesByTag("basic")
 }
 
 // Return kinds of basic types.
-func BasicKinds() []string {
+func (c C) BasicKinds() []string {
 	return instancesToKindStrings(BasicInstances())
 }
 
 // Return instances of comparable types.
-func ComparableInstances() []any {
+func (c C) ComparableInstances() []any {
 	return typeInstancesByTag("comparable")
 }
 
 // Return kinds of comparable types.
-func ComparableKinds() []string {
+func (c C) ComparableKinds() []string {
 	return instancesToKindStrings(ComparableInstances())
 }
 
 // Return instances of element types.
-func ElementInstances() []any {
+func (c C) ElementInstances() []any {
 	return typeInstancesByTag("element")
 }
 
 // Return kinds of element types.
-func ElementKinds() []string {
+func (c C) ElementKinds() []string {
 	return instancesToKindStrings(ElementInstances())
 }
 
 // Return instances of key types, identical to comparable types.
-func KeyInstances() []any {
+func (c C) KeyInstances() []any {
 	return typeInstancesByTag("key")
 }
 
 // Return kinds of key types.
-func KeyKinds() []string {
+func (c C) KeyKinds() []string {
 	return instancesToKindStrings(KeyInstances())
 }
 
 // Return a filtered list of kinds inclusively by the tags given,
 //
 //	then exclusively by specific kinds given.
-func Kinds(includeTags []string, exclude []string) []string {
+func (c C) Kinds(includeTags []string, exclude []string) []string {
 	var kinds []string
 
 	// Include kinds with the tags given. Else, include all.
@@ -96,7 +98,7 @@ func Kinds(includeTags []string, exclude []string) []string {
 // Return a filtered list of instances inclusively by the tags given,
 //
 //	then exclusively by specific kinds given.
-func Instances(includeTags []string, excludeKinds []string) []any {
+func (c C) Instances(includeTags []string, excludeKinds []string) []any {
 	var instances []any
 
 	// Include kinds with the tags given. Else, include all.
@@ -126,37 +128,37 @@ func Instances(includeTags []string, excludeKinds []string) []any {
 }
 
 // Return instances of integer types.
-func IntegerInstances() []any {
+func (c C) IntegerInstances() []any {
 	return typeInstancesByTag("integer")
 }
 
 // Return kinds of integer types.
-func IntegerKinds() []string {
+func (c C) IntegerKinds() []string {
 	return instancesToKindStrings(IntegerInstances())
 }
 
 // Return instances of ordered types.
-func OrderedInstances() []any {
+func (c C) OrderedInstances() []any {
 	return typeInstancesByTag("ordered")
 }
 
 // Return kinds of ordered types.
-func OrderedKinds() []string {
+func (c C) OrderedKinds() []string {
 	return instancesToKindStrings(OrderedInstances())
 }
 
 // Return instances of numeric types.
-func NumbericInstances() []any {
+func (c C) NumbericInstances() []any {
 	return typeInstancesByTag("numeric")
 }
 
 // Return kinds of numeric types.
-func NumbericKinds() []string {
+func (c C) NumbericKinds() []string {
 	return instancesToKindStrings(NumbericInstances())
 }
 
 // Return instances of slice types.
-func SliceInstances() []any {
+func (c C) SliceInstances() []any {
 	elementInstances := ElementInstances()
 	var sliceInstances []any
 
@@ -178,7 +180,7 @@ func SliceInstances() []any {
 }
 
 // Return instances of map types.
-func MapInstances() []any {
+func (c C) MapInstances() []any {
 	keyInstances := KeyInstances()
 	elementInstances := ElementInstances()
 	var mapInstances []any
