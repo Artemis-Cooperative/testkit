@@ -6,6 +6,21 @@ import (
 
 //region Public
 
+// Return all kinds.
+func AllKinds() []string {
+	return transform(
+		typeInstances,
+		func(instance TypeInstance) string {
+			return kindString(instance.Value)
+		})
+}
+
+// Return all type instances, excluding the kinds given.
+func AllTypeInstances() []any {
+	return transform(typeInstances,
+		func(instance TypeInstance) any { return instance.Value })
+}
+
 // Return instances of basic types.
 func BasicInstances() []any {
 	return typeInstancesByTag("basic")
@@ -44,6 +59,70 @@ func KeyInstances() []any {
 // Return kinds of key types.
 func KeyKinds() []string {
 	return instancesToKindStrings(KeyInstances())
+}
+
+// Return a filtered list of kinds inclusively by the tags given,
+//
+//	then exclusively by specific kinds given.
+func Kinds(includeTags []string, exclude []string) []string {
+	var kinds []string
+
+	// Include kinds with the tags given. Else, include all.
+	if isEmpty(includeTags) {
+		kinds = AllKinds()
+	} else {
+		for _, includeTag := range includeTags {
+			kinds = transform(
+				filter(typeInstances, func(instance TypeInstance) bool {
+					return has(instance.Tags, includeTag)
+				}),
+				func(instance TypeInstance) string {
+					return kindString(instance.Value)
+				},
+			)
+		}
+	}
+
+	// Exclude kinds given
+	if isNotEmpty(exclude) {
+		kinds = filter(kinds, func(kind string) bool {
+			return !has(exclude, kind)
+		})
+	}
+
+	return kinds
+}
+
+// Return a filtered list of instances inclusively by the tags given,
+//
+//	then exclusively by specific kinds given.
+func Instances(includeTags []string, excludeKinds []string) []any {
+	var instances []any
+
+	// Include kinds with the tags given. Else, include all.
+	if isEmpty(includeTags) {
+		instances = AllTypeInstances()
+	} else {
+		for _, includeTag := range includeTags {
+			instances = transform(
+				filter(typeInstances, func(instance TypeInstance) bool {
+					return has(instance.Tags, includeTag)
+				}),
+				func(instance TypeInstance) any {
+					return instance.Value
+				},
+			)
+		}
+	}
+
+	// Exclude kinds given
+	if isNotEmpty(excludeKinds) {
+		instances = filter(instances, func(instance any) bool {
+			return !has(excludeKinds, kindString(instance))
+		})
+	}
+
+	return instances
 }
 
 // Return instances of integer types.
@@ -120,56 +199,6 @@ func MapInstances() []any {
 	return mapInstances
 }
 
-// Return all type instances, excluding the kinds given.
-func AllTypeInstances(exclude []string) []any {
-	var filtered []any
-
-	for _, instance := range typeInstances {
-		kind := kindString(instance.Value)
-
-		if !has(exclude, kind) {
-			filtered = append(filtered, instance.Value)
-		}
-	}
-
-	return filtered
-}
-
-// Return all kinds, excluding the kinds given.
-func Kinds(includeTags []string, exclude []string) []string {
-	var kinds []string
-
-	// Include kinds with the tags given
-	for _, includeTag := range includeTags {
-		kinds = transform(
-			filter(typeInstances, func(instance TypeInstance) bool {
-				return has(instance.Tags, includeTag)
-			}),
-			func(instance TypeInstance) string {
-				return kindString(instance.Value)
-			},
-		)
-	}
-
-	// Exclude kinds given
-	if isNotEmpty(exclude) {
-		kinds = filter(kinds, func(kind string) bool {
-			return !has(exclude, kind)
-		})
-	}
-
-	return kinds
-}
-
-// Return all kinds.
-func AllKinds() []string {
-	return transform(
-		typeInstances,
-		func(instance TypeInstance) string {
-			return kindString(instance.Value)
-		})
-}
-
 //endregion
 
 //region Private
@@ -185,6 +214,11 @@ func filter[F any](filterables []F, criteria func(F) bool) []F {
 	}
 
 	return filtered
+}
+
+// Return true if the slice given is empty. Else, false.
+func isEmpty(values []string) bool {
+	return len(values) == 0
 }
 
 // Return true if the slice given is not empty. Else, false.
