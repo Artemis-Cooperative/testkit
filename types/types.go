@@ -6,79 +6,160 @@ import (
 
 //region Public
 
+type Types struct{}
+
+// Return all kinds.
+func (t Types) AllKinds() []string {
+	return transform(
+		typeInstances,
+		func(instance TypeInstance) string {
+			return kindString(instance.Value)
+		})
+}
+
+// Return all type instances, excluding the kinds given.
+func (t Types) AllTypeInstances() []any {
+	return transform(typeInstances,
+		func(instance TypeInstance) any { return instance.Value })
+}
+
 // Return instances of basic types.
-func BasicInstances() []any {
+func (t Types) BasicInstances() []any {
 	return typeInstancesByTag("basic")
 }
 
 // Return kinds of basic types.
-func BasicKinds() []string {
-	return instancesToKindStrings(BasicInstances())
+func (t Types) BasicKinds() []string {
+	return instancesToKindStrings(t.BasicInstances())
 }
 
 // Return instances of comparable types.
-func ComparableInstances() []any {
+func (t Types) ComparableInstances() []any {
 	return typeInstancesByTag("comparable")
 }
 
 // Return kinds of comparable types.
-func ComparableKinds() []string {
-	return instancesToKindStrings(ComparableInstances())
+func (t Types) ComparableKinds() []string {
+	return instancesToKindStrings(t.ComparableInstances())
 }
 
 // Return instances of element types.
-func ElementInstances() []any {
+func (t Types) ElementInstances() []any {
 	return typeInstancesByTag("element")
 }
 
 // Return kinds of element types.
-func ElementKinds() []string {
-	return instancesToKindStrings(ElementInstances())
+func (t Types) ElementKinds() []string {
+	return instancesToKindStrings(t.ElementInstances())
 }
 
 // Return instances of key types, identical to comparable types.
-func KeyInstances() []any {
+func (t Types) KeyInstances() []any {
 	return typeInstancesByTag("key")
 }
 
 // Return kinds of key types.
-func KeyKinds() []string {
-	return instancesToKindStrings(KeyInstances())
+func (t Types) KeyKinds() []string {
+	return instancesToKindStrings(t.KeyInstances())
+}
+
+// Return a filtered list of kinds inclusively by the tags given,
+//
+//	then exclusively by specific kinds given.
+func (t Types) Kinds(includeTags []string, exclude []string) []string {
+	var kinds []string
+
+	// Include kinds with the tags given. Else, include all.
+	if isEmpty(includeTags) {
+		kinds = t.AllKinds()
+	} else {
+		for _, includeTag := range includeTags {
+			kinds = transform(
+				filter(typeInstances, func(instance TypeInstance) bool {
+					return has(instance.Tags, includeTag)
+				}),
+				func(instance TypeInstance) string {
+					return kindString(instance.Value)
+				},
+			)
+		}
+	}
+
+	// Exclude kinds given
+	if isNotEmpty(exclude) {
+		kinds = filter(kinds, func(kind string) bool {
+			return !has(exclude, kind)
+		})
+	}
+
+	return kinds
+}
+
+// Return a filtered list of instances inclusively by the tags given,
+//
+//	then exclusively by specific kinds given.
+func (t Types) Instances(includeTags []string, excludeKinds []string) []any {
+	var instances []any
+
+	// Include kinds with the tags given. Else, include all.
+	if isEmpty(includeTags) {
+		instances = t.AllTypeInstances()
+	} else {
+		for _, includeTag := range includeTags {
+			instances = transform(
+				filter(typeInstances, func(instance TypeInstance) bool {
+					return has(instance.Tags, includeTag)
+				}),
+				func(instance TypeInstance) any {
+					return instance.Value
+				},
+			)
+		}
+	}
+
+	// Exclude kinds given
+	if isNotEmpty(excludeKinds) {
+		instances = filter(instances, func(instance any) bool {
+			return !has(excludeKinds, kindString(instance))
+		})
+	}
+
+	return instances
 }
 
 // Return instances of integer types.
-func IntegerInstances() []any {
+func (t Types) IntegerInstances() []any {
 	return typeInstancesByTag("integer")
 }
 
 // Return kinds of integer types.
-func IntegerKinds() []string {
-	return instancesToKindStrings(IntegerInstances())
+func (t Types) IntegerKinds() []string {
+	return instancesToKindStrings(t.IntegerInstances())
 }
 
 // Return instances of ordered types.
-func OrderedInstances() []any {
+func (t Types) OrderedInstances() []any {
 	return typeInstancesByTag("ordered")
 }
 
 // Return kinds of ordered types.
-func OrderedKinds() []string {
-	return instancesToKindStrings(OrderedInstances())
+func (t Types) OrderedKinds() []string {
+	return instancesToKindStrings(t.OrderedInstances())
 }
 
 // Return instances of numeric types.
-func NumbericInstances() []any {
+func (t Types) NumbericInstances() []any {
 	return typeInstancesByTag("numeric")
 }
 
 // Return kinds of numeric types.
-func NumbericKinds() []string {
-	return instancesToKindStrings(NumbericInstances())
+func (t Types) NumbericKinds() []string {
+	return instancesToKindStrings(t.NumbericInstances())
 }
 
 // Return instances of slice types.
-func SliceInstances() []any {
-	elementInstances := ElementInstances()
+func (t Types) SliceInstances() []any {
+	elementInstances := t.ElementInstances()
 	var sliceInstances []any
 
 	for _, v := range elementInstances {
@@ -99,9 +180,9 @@ func SliceInstances() []any {
 }
 
 // Return instances of map types.
-func MapInstances() []any {
-	keyInstances := KeyInstances()
-	elementInstances := ElementInstances()
+func (t Types) MapInstances() []any {
+	keyInstances := t.KeyInstances()
+	elementInstances := t.ElementInstances()
 	var mapInstances []any
 
 	for _, k := range keyInstances {
@@ -120,56 +201,6 @@ func MapInstances() []any {
 	return mapInstances
 }
 
-// Return all type instances, excluding the kinds given.
-func AllTypeInstances(exclude []string) []any {
-	var filtered []any
-
-	for _, instance := range typeInstances {
-		kind := kindString(instance.Value)
-
-		if !has(exclude, kind) {
-			filtered = append(filtered, instance.Value)
-		}
-	}
-
-	return filtered
-}
-
-// Return all kinds, excluding the kinds given.
-func Kinds(includeTags []string, exclude []string) []string {
-	var kinds []string
-
-	// Include kinds with the tags given
-	for _, includeTag := range includeTags {
-		kinds = transform(
-			filter(typeInstances, func(instance TypeInstance) bool {
-				return has(instance.Tags, includeTag)
-			}),
-			func(instance TypeInstance) string {
-				return kindString(instance.Value)
-			},
-		)
-	}
-
-	// Exclude kinds given
-	if isNotEmpty(exclude) {
-		kinds = filter(kinds, func(kind string) bool {
-			return !has(exclude, kind)
-		})
-	}
-
-	return kinds
-}
-
-// Return all kinds.
-func AllKinds() []string {
-	return transform(
-		typeInstances,
-		func(instance TypeInstance) string {
-			return kindString(instance.Value)
-		})
-}
-
 //endregion
 
 //region Private
@@ -185,6 +216,11 @@ func filter[F any](filterables []F, criteria func(F) bool) []F {
 	}
 
 	return filtered
+}
+
+// Return true if the slice given is empty. Else, false.
+func isEmpty(values []string) bool {
+	return len(values) == 0
 }
 
 // Return true if the slice given is not empty. Else, false.
